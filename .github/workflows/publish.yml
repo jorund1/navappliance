@@ -7,6 +7,16 @@ on:
       - completed
 
 jobs:
+  debug:
+    name: "Debug workflow variables"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo variables
+        run: |
+          echo "github.event.workflow_run.conclusion = ${{ github.event.workflow_run.conclusion }}"
+          echo "github.event.workflow_run.head_repository.full_name = ${{ github.event.workflow_run.head_repository.full_name }}"
+          echo "github.repository = ${{ github.repository }}"
+
   publish:
     name: "Publish appliance as release"
     runs-on: ubuntu-latest
