@@ -12,6 +12,7 @@ jobs:
       PACKER_LOG_PATH: packer_build.log
       PACKER_CACHE: .cache/packer
       PACKER_GITHUB_API_TOKEN: ${{ secrets.PACKER_GITHUB_API_TOKEN }}
+      DISTRO: bookworm
 
     steps:
       - name: Checkout repository
@@ -34,7 +35,7 @@ jobs:
       - name: Get ISO checksums
         id: get-checksum
         run: |
-          echo "checksum=$(cat bullseye.json | jq '.builders[].iso_checksum')" >> $GITHUB_OUTPUT
+          echo "checksum=$(cat "${DISTRO}.json" | jq '.builders[].iso_checksum')" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: "Cache downloaded packer images"
@@ -51,12 +52,12 @@ jobs:
 
       - name: Validate Template
         run: |
-          packer validate bullseye.json
+          packer validate "${DISTRO}.json"
 
       - name: Build Appliance Artifact
         timeout-minutes: 22
         run: |
-          packer build bullseye.json
+          packer build "${DISTRO}.json"
 
       - name: Make note of NAV package version installed
         id: version

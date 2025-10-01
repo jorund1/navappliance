@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APT_REPO: https://nav.uninett.no/debian
-      DISTRO: bullseye
+      DISTRO: bookworm
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
     steps:
