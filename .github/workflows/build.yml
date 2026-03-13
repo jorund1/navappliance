@@ -23,9 +23,9 @@ jobs:
           choco install virtualbox
 
       - name: Create packer cache directory
+        shell: bash
         run: |
           mkdir -p $PACKER_CACHE
-        shell: bash
 
       - name: Get ISO checksums
         id: get-checksum
