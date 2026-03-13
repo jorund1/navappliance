@@ -5,6 +5,9 @@ jobs:
   packer:
     name: "Build appliance using Packer"
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
     permissions:
       contents: write
     env:
@@ -20,10 +23,9 @@ jobs:
 
       - name: Install required packages from Chocolatey
         run: |
-          choco install virtualbox
+          choco install virtualbox -y
 
       - name: Create packer cache directory
-        shell: bash
         run: |
           mkdir -p $PACKER_CACHE
 
@@ -31,7 +33,6 @@ jobs:
         id: get-checksum
         run: |
           echo "checksum=$(cat "${DISTRO}.json" | jq '.builders[].iso_checksum')" >> $GITHUB_OUTPUT
-        shell: bash
 
       - name: "Cache downloaded packer images"
         uses: actions/cache/save@v3
@@ -48,20 +49,19 @@ jobs:
       - name: Validate Template
         run: |
           packer validate "${DISTRO}.json"
-        shell: bash
 
       - name: Build Appliance Artifact
         timeout-minutes: 22
+        env:
+          VBOX_INSTALL_PATH: "C:\\Program Files\\Oracle\\VirtualBox"
         run: |
           packer build "${DISTRO}.json"
-        shell: bash
 
       - name: Make note of NAV package version installed
         id: version
         run: |
             grep "Unpacking nav" "$PACKER_LOG_PATH" | awk -F '[()]' '{print $2}' > navappliance/version.txt
             echo "nav_version=$(cat navappliance/version.txt)" >> $GITHUB_OUTPUT
-        shell: bash
 
       - name: Create annotated tag
         run: |
@@ -69,7 +69,6 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git tag --force -a "v${{ steps.version.outputs.nav_version }}" -m "Successfully built with Debian package version ${{ steps.version.outputs.nav_version }}"
           git push --force origin "v${{ steps.version.outputs.nav_version }}"
-        shell: bash
 
       - name: Upload version artifact
         uses: actions/upload-artifact@v4
