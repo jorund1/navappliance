@@ -51,7 +51,7 @@ jobs:
           packer validate "${DISTRO}.json"
 
       - name: Build Appliance Artifact
-        timeout-minutes: 22
+        timeout-minutes: 60
         env:
           VBOX_INSTALL_PATH: "C:\\Program Files\\Oracle\\VirtualBox"
         run: |
