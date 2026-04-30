@@ -33,18 +33,16 @@ jobs:
           mkdir -p $PACKER_CACHE
 
       - name: Get ISO checksums
-        id: get-checksum
+        id: get-image-checksum
         run: |
           echo "checksum=$(cat "${DISTRO}.json" | jq '.builders[].iso_checksum')" >> $GITHUB_OUTPUT
-        shell: bash
 
-      - name: "Cache downloaded packer images"
-        uses: actions/cache/save@v3
-        if: always()
-        id: packer-cache
+      - name: Restore cached packer images
+        uses: actions/cache/restore@v3
+        id: packer-cache-restore
         with:
-          path: .cache/packer
-          key: ${{ steps.get-checksum.outputs.checksum }}
+          path: ${{ env.PACKER_CACHE }}
+          key: ${{ steps.get-image-checksum.outputs.checksum }}
 
       - name: Install virtualbox plugin
         run: |
@@ -92,3 +90,11 @@ jobs:
           name: navappliance
           path: |
             navappliance/**/*
+
+      - name: Cache downloaded packer images
+        uses: actions/cache/save@v3
+        if: always() && steps.get-image-checksum.outputs.checksum
+        id: packer-cache-save
+        with:
+          path: ${{ env.PACKER_CACHE }}
+          key: ${{ steps.get-image-checksum.outputs.checksum }}
