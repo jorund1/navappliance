@@ -67,7 +67,11 @@ jobs:
             New-Item -Path $dir -ItemType 'Directory' | Out-Null
           }
           Start-Process (Resolve-Path -Path "$env:VBOX_DOWNLOAD_PATH") -Wait -NoNewWindow -ArgumentList "-extract","-path",$extractpath,"-silent"
-          msiexec.exe /i (Resolve-Path -Path "$extractpath/*amd64.msi") /qn ADDLOCAL=VBoxApplication VBOX_START=0 VBOX_REGISTERFILEEXTENSIONS=0 VBOX_INSTALLQUICKLAUNCHSHORTCUT=0 VBOX_INSTALLDESKTOPSHORTCUT=0 INSTALLDIR=C:\VirtualBox
+          $installers = Resolve-Path -Path "$extractpath/*amd64.msi"
+          if (($installers | Measure-Object).Count -ne 1) {
+            throw "Expected 1 installer, got: $installers"
+          }
+          msiexec.exe /i $installers[0] /qn ADDLOCAL=VBoxApplication VBOX_START=0 VBOX_REGISTERFILEEXTENSIONS=0 VBOX_INSTALLQUICKLAUNCHSHORTCUT=0 VBOX_INSTALLDESKTOPSHORTCUT=0 INSTALLDIR=C:\VirtualBox
           "Installed to C:\VirtualBox"
           "C:\VirtualBox" >> "$env:GITHUB_PATH"
 
